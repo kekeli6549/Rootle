@@ -1,9 +1,37 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const API_URL = 'http://localhost:5000/api'; // Ensure this matches your backend URL
+
+// Professional 2025 Web Design Color Palette
+const COLORS = {
+    deepBrown: '#6F4E37',
+    deepGreen: '#0A4D4A',
+    softWhite: '#F5F5F5',
+    softBlack: '#1A1A1A',
+};
+
+// Background Image URL
+const BACKGROUND_IMAGE_URL = 'https://images.unsplash.com/photo-1541339907198-e08756c2f971?q=80&w=1920&auto=format&fit=crop';
+
+// Define keyframes animations for subtle, modern UI effects
+const animations = `
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+@keyframes backgroundZoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+}
+`;
 
 // NEW: Define your faculty and department data structure
 const FACULTY_DEPARTMENT_DATA = [
@@ -28,58 +56,52 @@ const FACULTY_DEPARTMENT_DATA = [
 function FileUpload() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [message, setMessage] = useState('');
-    const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', null
+    const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', 'uploading', null
     const { token } = useAuth();
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
 
     // NEW STATE VARIABLES for Faculty and Department
-    const [selectedFaculty, setSelectedFaculty] = useState(''); // Stores the currently selected faculty name
-    const [availableDepartments, setAvailableDepartments] = useState([]); // Stores departments for the selected faculty
-    const [selectedDepartment, setSelectedDepartment] = useState(''); // Stores the currently selected department name
-
+    const [selectedFaculty, setSelectedFaculty] = useState('');
+    const [availableDepartments, setAvailableDepartments] = useState([]);
+    const [selectedDepartment, setSelectedDepartment] = useState('');
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]); // Get the first selected file
-        setMessage(''); // Clear message on new file selection
-        setUploadStatus(null); // Reset status
+        setSelectedFile(event.target.files[0]);
+        setMessage('');
+        setUploadStatus(null);
     };
 
-    // NEW: Handle Faculty selection change
     const handleFacultyChange = (event) => {
         const facultyName = event.target.value;
-        setSelectedFaculty(facultyName); // Update selected faculty state
-        setSelectedDepartment(''); // Reset department when faculty changes
-
-        // Find the selected faculty's departments
+        setSelectedFaculty(facultyName);
+        setSelectedDepartment('');
         const faculty = FACULTY_DEPARTMENT_DATA.find(f => f.name === facultyName);
         if (faculty) {
-            setAvailableDepartments(faculty.departments); // Update available departments
+            setAvailableDepartments(faculty.departments);
         } else {
-            setAvailableDepartments([]); // No departments if no faculty selected or found
+            setAvailableDepartments([]);
         }
-        setMessage(''); // Clear messages
-        setUploadStatus(null); // Reset status
+        setMessage('');
+        setUploadStatus(null);
     };
 
-    // NEW: Handle Department selection change
     const handleDepartmentChange = (event) => {
-        setSelectedDepartment(event.target.value); // Update selected department state
-        setMessage(''); // Clear messages
-        setUploadStatus(null); // Reset status
+        setSelectedDepartment(event.target.value);
+        setMessage('');
+        setUploadStatus(null);
     };
 
     const handleSubmit = async (event) => {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault();
         setMessage('Uploading...');
-        setUploadStatus(null); // Reset status at the start of new upload
+        setUploadStatus('uploading');
 
         if (!selectedFile) {
             setMessage('Please select a file first.');
             setUploadStatus('error');
             return;
         }
-        // NEW VALIDATION: Ensure Faculty and Department are selected
         if (!selectedFaculty) {
             setMessage('Please select a Faculty.');
             setUploadStatus('error');
@@ -93,7 +115,6 @@ function FileUpload() {
 
         const formData = new FormData();
         formData.append('file', selectedFile);
-        // NEW: Append selected faculty and department to formData
         formData.append('faculty', selectedFaculty);
         formData.append('department', selectedDepartment);
 
@@ -111,11 +132,11 @@ function FileUpload() {
 
             setMessage(`Success: ${response.data.message} File: ${response.data.file.originalName}`);
             setUploadStatus('success');
-            setSelectedFile(null); // Clear the state
-            setSelectedFaculty(''); // NEW: Clear faculty dropdown
-            setAvailableDepartments([]); // NEW: Clear departments
-            setSelectedDepartment(''); // NEW: Clear department dropdown
-            if (fileInputRef.current) { // Clear the file input field visually
+            setSelectedFile(null);
+            setSelectedFaculty('');
+            setAvailableDepartments([]);
+            setSelectedDepartment('');
+            if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
         } catch (error) {
@@ -125,289 +146,394 @@ function FileUpload() {
         }
     };
 
-    // Function for retry button
     const handleRetry = () => {
-        setSelectedFile(null); // Clear any previously selected file from state
-        setMessage(''); // Clear error message
-        setUploadStatus(null); // Reset status
-        setSelectedFaculty(''); // NEW: Clear faculty dropdown
-        setAvailableDepartments([]); // NEW: Clear departments
-        setSelectedDepartment(''); // NEW: Clear department dropdown
-        if (fileInputRef.current) { // Clear the file input field visually
+        setSelectedFile(null);
+        setMessage('');
+        setUploadStatus(null);
+        setSelectedFaculty('');
+        setAvailableDepartments([]);
+        setSelectedDepartment('');
+        if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
-    // Function for go back button
     const handleGoBack = () => {
-        navigate('/'); // Navigates to the home page
+        navigate('/');
     };
 
     return (
         <div style={styles.container}>
-            <div style={styles.header}>
-                <button onClick={handleGoBack} style={styles.goBackButton}>
-                    Back To Home
-                </button>
-                <h2>Upload Academic Resource</h2>
-            </div>
-            <form onSubmit={handleSubmit} style={styles.form}>
-                {/* NEW: Faculty Dropdown */}
-                <div style={styles.formGroup}>
-                    <label htmlFor="faculty-select" style={styles.label}>Faculty:</label>
-                    <select
-                        id="faculty-select"
-                        value={selectedFaculty}
-                        onChange={handleFacultyChange}
-                        required
-                        style={styles.select} // Apply new style
-                    >
-                        <option value="">Select Faculty</option>
-                        {FACULTY_DEPARTMENT_DATA.map((faculty) => (
-                            <option key={faculty.name} value={faculty.name}>
-                                {faculty.name}
-                            </option>
-                        ))}
-                    </select>
+            <div style={styles.overlay}></div>
+            <div style={styles.contentWrapper}>
+                <div style={styles.backButtonContainer}>
+                    <button onClick={handleGoBack} style={styles.backButton}>
+                        Back to Home
+                    </button>
                 </div>
+                <div style={styles.uploadContainer}>
+                    <h2 style={styles.title}>Upload Academic Resource</h2>
+                    <form onSubmit={handleSubmit} style={styles.form}>
+                        {/* Faculty Dropdown */}
+                        <div style={styles.formGroup}>
+                            <label htmlFor="faculty-select" style={styles.label}>Faculty:</label>
+                            <select
+                                id="faculty-select"
+                                value={selectedFaculty}
+                                onChange={handleFacultyChange}
+                                required
+                                style={styles.select}
+                            >
+                                <option value="">Select Faculty</option>
+                                {FACULTY_DEPARTMENT_DATA.map((faculty) => (
+                                    <option key={faculty.name} value={faculty.name}>
+                                        {faculty.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                {/* NEW: Department Dropdown (conditionally rendered) */}
-                {selectedFaculty && ( // Only show if a faculty is selected
-                    <div style={styles.formGroup}>
-                        <label htmlFor="department-select" style={styles.label}>Department:</label>
-                        <select
-                            id="department-select"
-                            value={selectedDepartment}
-                            onChange={handleDepartmentChange}
-                            required
-                            style={styles.select} // Apply new style
+                        {/* Department Dropdown (conditionally rendered) */}
+                        {selectedFaculty && (
+                            <div style={styles.formGroup}>
+                                <label htmlFor="department-select" style={styles.label}>Department:</label>
+                                <select
+                                    id="department-select"
+                                    value={selectedDepartment}
+                                    onChange={handleDepartmentChange}
+                                    required
+                                    style={styles.select}
+                                >
+                                    <option value="">Select Department</option>
+                                    {availableDepartments.map((department) => (
+                                        <option key={department} value={department}>
+                                            {department}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        <div style={styles.formGroup}>
+                            <label htmlFor="file-input" style={styles.label}>Select File:</label>
+                            <div style={styles.fileInputWrapper}>
+                                <input
+                                    type="file"
+                                    id="file-input"
+                                    onChange={handleFileChange}
+                                    ref={fileInputRef}
+                                    style={styles.hiddenFileInput}
+                                />
+                                <span style={styles.fileName}>{selectedFile ? selectedFile.name : 'Choose a file...'}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current.click()}
+                                    style={styles.chooseFileButton}
+                                >
+                                    Browse
+                                </button>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            style={styles.uploadButton}
+                            disabled={!selectedFile || !selectedFaculty || !selectedDepartment || uploadStatus === 'uploading'}
                         >
-                            <option value="">Select Department</option>
-                            {availableDepartments.map((department) => (
-                                <option key={department} value={department}>
-                                    {department}
-                                </option>
-                            ))}
-                        </select>
+                            {uploadStatus === 'uploading' ? 'Uploading...' : 'Upload File'}
+                        </button>
+                    </form>
+
+                    {/* Conditional rendering of messages */}
+                    {message && (
+                        <p style={
+                            uploadStatus === 'success' ? styles.successMessage :
+                            uploadStatus === 'error' ? styles.errorMessage :
+                            styles.infoMessage
+                        }>
+                            {message}
+                        </p>
+                    )}
+
+                    {/* Conditional buttons based on upload status */}
+                    <div style={styles.buttonContainer}>
+                        {uploadStatus === 'success' && (
+                            <button
+                                onClick={() => navigate('/my-files')}
+                                style={{ ...styles.actionButton, ...styles.viewUploadsButton }}
+                            >
+                                See Your Uploads
+                            </button>
+                        )}
+
+                        {uploadStatus === 'error' && (
+                            <button
+                                onClick={handleRetry}
+                                style={{ ...styles.actionButton, ...styles.retryButton }}
+                            >
+                                Retry Upload
+                            </button>
+                        )}
                     </div>
-                )}
 
-                <div style={styles.formGroup}>
-                    <label htmlFor="file-input" style={styles.label}>Select File:</label>
-                    <input
-                        type="file"
-                        id="file-input"
-                        onChange={handleFileChange}
-                        required
-                        style={styles.fileInput}
-                        ref={fileInputRef}
-                    />
+                    <p style={styles.infoTextBottom}>Allowed formats: PDF, Word documents (.doc, .docx), Images. Max 10MB.</p>
                 </div>
-                <button type="submit" style={styles.button} disabled={!selectedFile || !selectedFaculty || !selectedDepartment || uploadStatus === 'uploading'}>
-                    {uploadStatus === 'uploading' ? 'Uploading...' : 'Upload File'}
-                </button>
-            </form>
-
-            {/* Conditional rendering of messages */}
-            {message && (
-                <p style={
-                    uploadStatus === 'success' ? styles.successMessage :
-                    uploadStatus === 'error' ? styles.errorMessage :
-                    styles.infoMessage
-                }>
-                    {message}
-                </p>
-            )}
-
-            {/* Conditional buttons based on upload status */}
-            <div style={styles.buttonContainer}>
-                {uploadStatus === 'success' && (
-                    <button
-                        onClick={() => navigate('/my-files')}
-                        style={{ ...styles.actionButton, ...styles.viewUploadsButton }}
-                    >
-                        See Your Uploads
-                    </button>
-                )}
-
-                {uploadStatus === 'error' && (
-                    <button
-                        onClick={handleRetry}
-                        style={{ ...styles.actionButton, ...styles.retryButton }}
-                    >
-                        Retry Upload
-                    </button>
-                )}
             </div>
-
-            <p style={styles.infoTextBottom}>Allowed formats: PDF, Word documents (.doc, .docx), Images. Max 10MB.</p>
         </div>
     );
 }
 
-// Basic inline styles (replace with your template's CSS)
 const styles = {
+    // Main container with animated background
     container: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '80vh',
-        fontFamily: 'Arial, sans-serif',
-        backgroundColor: '#f9f9f9',
+        minHeight: '100vh',
+        fontFamily: 'Inter, sans-serif',
+        backgroundColor: COLORS.softWhite,
+        backgroundImage: `url(${BACKGROUND_IMAGE_URL})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        position: 'relative',
+        overflow: 'hidden',
+        animation: 'backgroundZoom 60s ease-in-out infinite alternate',
+    },
+    overlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 1,
+    },
+    contentWrapper: {
+        width: '100%',
+        maxWidth: '700px',
         padding: '20px',
         boxSizing: 'border-box',
+        zIndex: 2,
     },
-    header: {
+    backButtonContainer: {
         width: '100%',
-        maxWidth: '500px',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '20px',
-        position: 'relative',
+        justifyContent: 'flex-start',
+        marginBottom: '30px',
     },
-    goBackButton: {
-        padding: '8px 15px',
-        backgroundColor: '#6c757d',
-        color: 'white',
+    backButton: {
+        padding: '12px 25px',
+        backgroundColor: COLORS.deepBrown,
+        color: COLORS.softWhite,
         border: 'none',
-        borderRadius: '5px',
+        borderRadius: '10px',
         cursor: 'pointer',
-        fontSize: '0.9em',
-        transition: 'background-color 0.3s ease',
-        position: 'absolute',
-        left: '0',
-        top: '50%',
-        transform: 'translateY(-50%)',
+        fontSize: '1em',
+        fontWeight: 'bold',
+        textDecoration: 'none',
+        transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        boxShadow: `0 4px 8px rgba(0,0,0,0.15)`,
+        '&:hover': {
+            backgroundColor: COLORS.deepGreen,
+            transform: 'translateY(-2px) scale(1.02)',
+            boxShadow: `0 6px 12px rgba(0,0,0,0.25)`,
+        },
     },
-    goBackButtonHover: {
-        backgroundColor: '#5a6268',
-    },
-    form: {
-        backgroundColor: '#fff',
-        padding: '30px',
-        borderRadius: '8px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+    uploadContainer: {
+        backgroundColor: `rgba(${parseInt(COLORS.softWhite.slice(1, 3), 16)}, ${parseInt(COLORS.softWhite.slice(3, 5), 16)}, ${parseInt(COLORS.softWhite.slice(5, 7), 16)}, 0.95)`,
+        backdropFilter: 'blur(10px)',
+        padding: '40px',
+        borderRadius: '20px',
+        boxShadow: `0 10px 30px rgba(0,0,0,0.2)`,
         width: '100%',
-        maxWidth: '500px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
+        gap: '30px',
+        animation: 'fadeIn 0.7s ease-out',
+    },
+    title: {
+        color: COLORS.deepGreen,
+        fontSize: '2.5em',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: '20px',
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '25px',
     },
     formGroup: {
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-start',
     },
     label: {
-        marginBottom: '8px',
+        color: COLORS.deepBrown,
         fontWeight: 'bold',
-        color: '#333',
+        marginBottom: '10px',
         fontSize: '1.1em',
     },
-    fileInput: {
-        padding: '10px',
-        border: '1px solid #ddd',
-        borderRadius: '5px',
-        width: '100%',
-        boxSizing: 'border-box',
-    },
-    // NEW: Style for select dropdowns
     select: {
-        padding: '10px',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
+        padding: '15px',
+        border: `2px solid #ddd`,
+        borderRadius: '10px',
         fontSize: '1em',
-        width: '100%',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
+        color: COLORS.softBlack,
+        backgroundColor: '#f8f8f8',
         cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        '&:focus': {
+            borderColor: COLORS.deepGreen,
+            outline: 'none',
+            boxShadow: `0 0 0 4px rgba(${parseInt(COLORS.deepGreen.slice(1, 3), 16)}, ${parseInt(COLORS.deepGreen.slice(3, 5), 16)}, ${parseInt(COLORS.deepGreen.slice(5, 7), 16)}, 0.1)`,
+        },
     },
-    button: {
-        padding: '12px 25px',
-        backgroundColor: '#28a745',
-        color: 'white',
+    fileInputWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '10px',
+        border: `2px solid #ddd`,
+        borderRadius: '10px',
+        backgroundColor: '#f8f8f8',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+            borderColor: COLORS.deepGreen,
+        },
+    },
+    hiddenFileInput: {
+        display: 'none',
+    },
+    fileName: {
+        flex: 1,
+        color: COLORS.softBlack,
+        fontSize: '1em',
+        padding: '0 10px',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+    },
+    chooseFileButton: {
+        padding: '8px 15px',
+        backgroundColor: COLORS.deepBrown,
+        color: COLORS.softWhite,
         border: 'none',
-        borderRadius: '6px',
-        fontSize: '1.2em',
+        borderRadius: '8px',
         cursor: 'pointer',
-        transition: 'background-color 0.3s ease, transform 0.1s ease',
+        fontSize: '0.9em',
+        fontWeight: 'bold',
+        transition: 'background-color 0.3s ease, transform 0.2s ease',
+        '&:hover': {
+            backgroundColor: COLORS.deepGreen,
+            transform: 'scale(1.05)',
+        },
     },
-    buttonHover: {
-        backgroundColor: '#218838',
-        transform: 'translateY(-1px)',
-    },
-    buttonDisabled: {
-        backgroundColor: '#cccccc',
-        cursor: 'not-allowed',
+    uploadButton: {
+        padding: '15px 30px',
+        backgroundColor: COLORS.deepGreen,
+        color: COLORS.softWhite,
+        border: 'none',
+        borderRadius: '10px',
+        fontSize: '1.2em',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        boxShadow: `0 4px 10px rgba(0,0,0,0.15)`,
+        '&:hover': {
+            backgroundColor: COLORS.deepBrown,
+            transform: 'translateY(-2px) scale(1.01)',
+            boxShadow: `0 6px 15px rgba(0,0,0,0.25)`,
+        },
+        '&:disabled': {
+            backgroundColor: '#A0A0A0',
+            cursor: 'not-allowed',
+            boxShadow: 'none',
+            transform: 'none',
+            opacity: 0.6,
+        },
     },
     successMessage: {
-        color: '#28a745',
+        color: COLORS.deepGreen,
         fontWeight: 'bold',
         marginTop: '20px',
         fontSize: '1.1em',
-        backgroundColor: '#d4edda',
-        padding: '10px',
-        borderRadius: '5px',
+        backgroundColor: '#e6f4e6',
+        padding: '15px',
+        borderRadius: '10px',
         width: '100%',
-        maxWidth: '500px',
         textAlign: 'center',
-        border: '1px solid #c3e6cb',
+        border: `1px solid ${COLORS.deepGreen}`,
+        animation: 'fadeIn 0.5s ease-out, pulse 2s infinite',
     },
     errorMessage: {
-        color: '#dc3545',
+        color: COLORS.deepBrown,
         fontWeight: 'bold',
         marginTop: '20px',
         fontSize: '1.1em',
-        backgroundColor: '#f8d7da',
-        padding: '10px',
-        borderRadius: '5px',
+        backgroundColor: '#fbe9e7',
+        padding: '15px',
+        borderRadius: '10px',
         width: '100%',
-        maxWidth: '500px',
         textAlign: 'center',
-        border: '1px solid #f5c6cb',
+        border: `1px solid ${COLORS.deepBrown}`,
+        animation: 'fadeIn 0.5s ease-out',
     },
     infoMessage: {
-        color: '#007bff',
+        color: COLORS.softBlack,
         fontWeight: 'bold',
         marginTop: '20px',
         fontSize: '1.1em',
-        backgroundColor: '#cfe2ff',
-        padding: '10px',
-        borderRadius: '5px',
+        backgroundColor: '#f0f0f0',
+        padding: '15px',
+        borderRadius: '10px',
         width: '100%',
-        maxWidth: '500px',
         textAlign: 'center',
-        border: '1px solid #b9d7fd',
+        border: `1px solid ${COLORS.softBlack}`,
+        animation: 'fadeIn 0.5s ease-out',
     },
     infoTextBottom: {
-        marginTop: '15px',
-        color: '#666',
+        marginTop: '20px',
+        color: COLORS.softBlack,
         fontSize: '0.9em',
+        textAlign: 'center',
+        opacity: 0.7,
     },
     buttonContainer: {
         display: 'flex',
-        gap: '15px',
+        gap: '20px',
         marginTop: '20px',
         justifyContent: 'center',
         flexWrap: 'wrap',
     },
     actionButton: {
-        padding: '10px 20px',
-        borderRadius: '5px',
+        padding: '15px 25px',
+        borderRadius: '10px',
         border: 'none',
         cursor: 'pointer',
         fontSize: '1em',
-        transition: 'background-color 0.3s ease',
-        color: 'white',
+        fontWeight: 'bold',
+        transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        boxShadow: `0 4px 10px rgba(0,0,0,0.15)`,
+        '&:hover': {
+            transform: 'translateY(-2px) scale(1.01)',
+            boxShadow: `0 6px 15px rgba(0,0,0,0.25)`,
+        },
     },
     viewUploadsButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: COLORS.deepGreen,
+        color: COLORS.softWhite,
+        '&:hover': {
+            backgroundColor: COLORS.deepBrown,
+        },
     },
     retryButton: {
-        backgroundColor: '#ffc107',
-        color: '#333',
+        backgroundColor: COLORS.deepBrown,
+        color: COLORS.softWhite,
+        '&:hover': {
+            backgroundColor: COLORS.deepGreen,
+        },
     }
 };
 

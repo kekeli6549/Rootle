@@ -6,12 +6,13 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 // Import the authentication components we created earlier
 import Login from './components/Login';
 import Register from './components/Register';
-import FileUpload from './components/FileUpload'; // Import FileUpload component
-import MyFiles from './components/MyFiles';       // Import MyFiles component
-import AllFiles from './components/AllFiles';     // Import AllFiles component
+import FileUpload from './components/FileUpload';
+import MyFiles from './components/MyFiles';
+import AllFiles from './components/AllFiles';
 
-// NEW: Placeholder image URL for the background
-const BACKGROUND_IMAGE_URL = 'https://placehold.co/1920x1080/ADD8E6/000000?text=Academic+Background'; // Light blue background with text
+// Updated background image URL to a university-themed image
+const BACKGROUND_IMAGE_URL = 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80';
+// Fallback background in case the main one fails to load
 
 // --- Component: Home ---
 // This component serves as the landing page. Its content changes based on authentication status.
@@ -87,104 +88,131 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // --- Updated Inline Styles for Home/Protected ---
+const COLORS = {
+    deepBrown: '#6F4E37',
+    deepGreen: '#0A4D4A',
+    softWhite: '#F5F5F5',
+    softBlack: '#1A1A1A',
+};
+
+// Define a keyframes animation for a subtle fade-in effect
+const fadeInAnimation = `
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+`;
+
 const homeStyles = {
     container: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '100vh', // Take full viewport height
-        fontFamily: 'Inter, sans-serif', // Use Inter font
+        minHeight: '100vh',
+        fontFamily: 'Inter, sans-serif',
         padding: '20px',
         boxSizing: 'border-box',
-        // NEW: Background image and overlay
         backgroundImage: `url(${BACKGROUND_IMAGE_URL})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        position: 'relative', // Needed for overlay
-        overflow: 'hidden', // Hide overflow if image is too large
+        position: 'relative',
+        overflow: 'hidden',
     },
-    contentBox: { // NEW: A box to hold content, making it readable over background
-        backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white background
+    contentBox: {
+        // Use the soft white from the new palette with a slight transparency
+        backgroundColor: `rgba(${parseInt(COLORS.softWhite.slice(1, 3), 16)}, ${parseInt(COLORS.softWhite.slice(3, 5), 16)}, ${parseInt(COLORS.softWhite.slice(5, 7), 16)}, 0.9)`,
         padding: '40px',
-        borderRadius: '15px', // Rounded corners
-        boxShadow: '0 10px 30px rgba(0,0,0,0.2)', // Soft shadow
+        borderRadius: '20px', // More modern, rounded corners
+        // Deeper, more noticeable shadow for a sense of depth
+        boxShadow: `0 15px 40px rgba(0,0,0,0.3)`,
         width: '90%',
         maxWidth: '600px',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px', // Space between elements
-        position: 'relative', // Ensure content is above overlay
-        zIndex: 2, // Ensure it's above the pseudo-element overlay
+        gap: '20px',
+        position: 'relative',
+        zIndex: 2,
+        // Apply the fade-in animation for a smooth entry
+        animation: 'fadeIn 1s ease-in-out',
     },
     heading: {
-        color: '#2c3e50', // Darker heading color
+        // Use the deep green for the main heading to make it stand out
+        color: COLORS.deepGreen,
         marginBottom: '10px',
-        fontSize: '2.5em', // Larger heading
+        fontSize: '3em', // Larger, more impactful heading
         fontWeight: 'bold',
+        letterSpacing: '-0.5px', // Subtle kerning for a professional look
     },
-    tagline: { // NEW: Style for tagline
-        color: '#34495e',
-        fontSize: '1.2em',
+    tagline: {
+        // Use the deep brown for a warm, complementary tagline
+        color: COLORS.deepBrown,
+        fontSize: '1.4em',
         marginBottom: '20px',
         fontStyle: 'italic',
+        opacity: 0.8, // Slightly lower opacity for a subtle effect
     },
     greeting: {
-        fontSize: '1.3em',
-        color: '#2980b9', // Blue for greeting
+        // Use deep green for the greeting to keep the theme consistent
+        fontSize: '1.5em',
+        color: COLORS.deepGreen,
         fontWeight: 'bold',
         marginBottom: '10px',
     },
     message: {
+        // Use the soft black for the main body text for readability
         fontSize: '1.1em',
-        color: '#555',
+        color: COLORS.softBlack,
         marginBottom: '30px',
         lineHeight: '1.6',
     },
     nav: {
         display: 'flex',
-        gap: '15px',
+        gap: '20px', // Increased gap for better spacing
         flexWrap: 'wrap',
         justifyContent: 'center',
         marginTop: '20px',
     },
     navLink: {
-        backgroundColor: '#3498db', // Brighter blue
-        color: 'white',
-        padding: '12px 25px',
-        borderRadius: '8px', // More rounded
+        backgroundColor: COLORS.deepGreen,
+        color: COLORS.softWhite,
+        padding: '15px 30px',
+        borderRadius: '10px',
         textDecoration: 'none',
         fontSize: '1.1em',
         fontWeight: 'bold',
-        transition: 'background-color 0.3s ease, transform 0.2s ease',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        // Note: Inline styles don't directly support hover states,
-        // but these represent the desired hover effect if using CSS modules or styled-components.
-        // For pure inline, this is illustrative.
+        // Add a smooth transition for all transformations
+        transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
         '&:hover': {
-            backgroundColor: '#2980b9',
-            transform: 'translateY(-2px)',
+            backgroundColor: COLORS.deepBrown, // Hover state with the deep brown color
+            transform: 'translateY(-3px) scale(1.02)', // Lift and slightly enlarge on hover
+            boxShadow: `0 8px 20px rgba(0,0,0,0.25)`, // More pronounced shadow on hover
         }
     },
     logoutButton: {
-        backgroundColor: '#e74c3c', // Red for logout
-        color: 'white',
-        padding: '12px 25px',
-        borderRadius: '8px',
+        backgroundColor: COLORS.deepBrown, // Use the deep brown for the logout button
+        color: COLORS.softWhite,
+        padding: '15px 30px',
+        borderRadius: '10px',
         border: 'none',
         cursor: 'pointer',
         fontSize: '1.1em',
         fontWeight: 'bold',
-        transition: 'background-color 0.3s ease, transform 0.2s ease',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        // Note: Inline styles don't directly support hover states,
-        // but these represent the desired hover effect if using CSS modules or styled-components.
-        // For pure inline, this is illustrative.
+        transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
         '&:hover': {
-            backgroundColor: '#c0392b',
-            transform: 'translateY(-2px)',
+            backgroundColor: COLORS.deepGreen, // Switch to green on hover
+            transform: 'translateY(-3px) scale(1.02)',
+            boxShadow: `0 8px 20px rgba(0,0,0,0.25)`,
         }
     },
 };
