@@ -10,7 +10,7 @@ const API_URL = 'http://localhost:5000/api';
 
 // The new, earthy color palette
 const COLORS = {
-    background: '#F5F5DC', // Beige
+    background: '#ffa989ff', // Peach for soft contrast
     primary: '#D96D46',     // Terracotta/Burnt Orange for actions
     secondary: '#EFEAD5',   // Light Tan for cards and dropdowns
     text: '#4A3C32',        // Deep Brown for primary text
